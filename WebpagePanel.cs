@@ -124,7 +124,8 @@ namespace QuickLook.Plugin.WebViewPlus
                 _sharedBuffer.Dispose();
                 _sharedBuffer = null;
             }
-            var isBinary = _binExtensions.Any(_activeFileInfo.FullName.ToLower().EndsWith);
+            var extension = _activeFileInfo.Extension.ToLower().Substring(1);
+            var isBinary = _binExtensions.Any(extension.Equals);
             var textContent = "";
             if (isBinary)
             {
@@ -186,7 +187,7 @@ namespace QuickLook.Plugin.WebViewPlus
             var webAppInConfigFolder = Path.Combine(SettingHelper.LocalDataPath, "webviewplus");
             var webAppInBundledFolder = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "webviewplus");
             var uri = new Uri("https://webviewplus/index.html");
-            var webAppUrl = SettingHelper.Get<string>("WebAppUrlX", null, "QuickLook.Plugin.WebViewPlus");
+            var webAppUrl = SettingHelper.Get<string>("WebAppUrl", null, "QuickLook.Plugin.WebViewPlus");
             if (webAppUrl != null)
             {
                 ProcessHelper.WriteLog($"QuickLook.Plugin.WebViewPlus using app via custom url: {webAppUrl}");

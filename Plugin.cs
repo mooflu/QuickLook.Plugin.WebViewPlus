@@ -21,7 +21,8 @@ namespace QuickLook.Plugin.WebViewPlus
 
         public bool CanHandle(string path)
         {
-            return !Directory.Exists(path) && _panel.Extensions.Any(path.ToLower().EndsWith);
+            var extension = Path.GetExtension(path).ToLower().Substring(1);
+            return !Directory.Exists(path) && _panel.Extensions.Any(extension.Equals);
         }
 
         public void Prepare(string path, ContextObject context)
