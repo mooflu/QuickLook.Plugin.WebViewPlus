@@ -37,7 +37,7 @@ namespace QuickLook.Plugin.WebViewPlus
             "html,htm,mht,mhtml,pdf,csv,xlsx,svg,md,markdown,gltf,glb,c++,h++,bat,c,cmake,cpp,cs,css,go,h,hpp,java,js,json,jsx,lua,perl,pl,ps1,psm1,py,rb,sass,scss,sh,sql,tex,ts,tsx,txt,webp,yaml,yml";
         public string[] Extensions = { };
 
-        private static readonly string[] _binExtensions = "pdf,xlsx,xls,ods,gltf,glb,fbx,obj,webp".Split(',');
+        private static readonly string[] _binExtensions = "pdf,xlsx,xls,ods,gltf,glb,fbx,obj,webp,jpg,jpeg,png,apng,gif,tif,tiff".Split(',');
         private Uri _currentUri;
         private WebView2 _webView;
         private bool _webAppReady = false;
