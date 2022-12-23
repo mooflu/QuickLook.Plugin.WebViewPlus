@@ -2,6 +2,7 @@
 
 using System;
 using System.Diagnostics;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -60,7 +61,8 @@ namespace QuickLook.Plugin.WebViewPlus
                 {
                     CreationProperties = new CoreWebView2CreationProperties
                     {
-                        UserDataFolder = Path.Combine(SettingHelper.LocalDataPath, @"WebView2_Data\\")
+                        UserDataFolder = Path.Combine(SettingHelper.LocalDataPath, @"WebView2_Data\\"),
+                        Language = CultureInfo.CurrentUICulture.Name
                     }
                 };
                 _webView.NavigationStarting += NavigationStarting_CancelNavigation;
@@ -163,6 +165,11 @@ namespace QuickLook.Plugin.WebViewPlus
             {
                 case "AppReadyForData":
                     _webAppReady = true;
+                    // If the user profile was previously generated (WebView2_Data), it doesn't seem to change the navigator.language setting
+                    // when a webview is created with a different language in 'new WebView2' above.
+                    // You'd have to delete the WebView2_Data folder first.
+                    // Oh, well. Explicitly sending current language to web app, instead.
+                    _webView.CoreWebView2.PostWebMessageAsString($"setLanguage:{CultureInfo.CurrentUICulture.Name}");
                     sendFileData();
                     break;
 
