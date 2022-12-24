@@ -38,7 +38,7 @@ namespace QuickLook.Plugin.WebViewPlus
             "html,htm,mht,mhtml,pdf,csv,xlsx,svg,md,markdown,gltf,glb,c++,h++,bat,c,cmake,cpp,cs,css,go,h,hpp,java,js,json,jsx,lua,perl,pl,ps1,psm1,py,rb,sass,scss,sh,sql,tex,ts,tsx,txt,webp,yaml,yml";
         public string[] Extensions = { };
 
-        private static readonly string[] _binExtensions = "pdf,xlsx,xls,ods,gltf,glb,fbx,obj,webp,jpg,jpeg,png,apng,gif,tif,tiff".Split(',');
+        private static readonly string[] _binExtensions = "pdf,xlsx,xls,ods,gltf,glb,fbx,obj,webp,jpg,jpeg,png,apng,gif,bmp".Split(',');
         private Uri _currentUri;
         private WebView2 _webView;
         private bool _webAppReady = false;
@@ -186,6 +186,10 @@ namespace QuickLook.Plugin.WebViewPlus
         private void CoreWebView2InitializationCompleted(object sender, EventArgs e)
         {
             _webView.CoreWebView2.WebMessageReceived += WebMessageReceived;
+            _webView.CoreWebView2.NewWindowRequested += NewWindowRequested;
+            _webView.CoreWebView2.FrameNavigationStarting += FrameNavigationStarting;
+            _webView.CoreWebView2.Settings.AreDefaultScriptDialogsEnabled = false;
+            _webView.CoreWebView2.Settings.AreHostObjectsAllowed = false;
 
             // 3 places to get web app:
             // 1. a url via WebAppUrl (e.g. locally hosted vite dev version of app)
@@ -217,11 +221,31 @@ namespace QuickLook.Plugin.WebViewPlus
             _webView.Source = uri;
             _currentUri = _webView.Source;
         }
-
+        private void NewWindowRequested(object sender, CoreWebView2NewWindowRequestedEventArgs e)
+        {
+            // Prevent new windows being opened (e.g. ctrl-click link)
+            e.Handled = true;
+            if (_webAppReady)
+            {
+                _webView.CoreWebView2.PostWebMessageAsString("newWindowRejected");
+            }
+        }
         private void NavigationStarting_CancelNavigation(object sender, CoreWebView2NavigationStartingEventArgs e)
         {
             var newUri = new Uri(e.Uri);
             if (newUri != _currentUri) e.Cancel = true;
+        }
+
+        private void FrameNavigationStarting(object sender, CoreWebView2NavigationStartingEventArgs e)
+        {
+            if (!e.Uri.StartsWith("blob:"))
+            {
+                e.Cancel = true;
+                if (_webAppReady)
+                {
+                    _webView.CoreWebView2.PostWebMessageAsString("frameNavigationRejected");
+                }
+            }
         }
 
         public void UnloadData()
