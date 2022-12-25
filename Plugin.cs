@@ -42,7 +42,9 @@ namespace QuickLook.Plugin.WebViewPlus
 
         public void Cleanup()
         {
+            // starting webview2 is expensive, so keep it running and just unload the webapp data
             _panel.UnloadData();
+
             //_panel?.Dispose();
             //_panel = null;
         }

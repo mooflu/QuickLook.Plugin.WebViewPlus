@@ -61,7 +61,11 @@ namespace QuickLook.Plugin.WebViewPlus
                 {
                     CreationProperties = new CoreWebView2CreationProperties
                     {
-                        UserDataFolder = Path.Combine(SettingHelper.LocalDataPath, @"WebView2_Data\\"),
+                        // Note: using a different user data folder than the built-in HTmlViewer plugin
+                        // This plugin starts the webview once and keeps it running and would effectively
+                        // block the HTmlViewer if it used the same folder.
+                        // See "Process model for WebView2 apps"
+                        UserDataFolder = Path.Combine(SettingHelper.LocalDataPath, @"WebViewPlus_Data\\"),
                         Language = CultureInfo.CurrentUICulture.Name
                     }
                 };
@@ -190,6 +194,13 @@ namespace QuickLook.Plugin.WebViewPlus
             _webView.CoreWebView2.FrameNavigationStarting += FrameNavigationStarting;
             _webView.CoreWebView2.Settings.AreDefaultScriptDialogsEnabled = false;
             _webView.CoreWebView2.Settings.AreHostObjectsAllowed = false;
+            _webView.CoreWebView2.Profile.ClearBrowsingDataAsync(
+                CoreWebView2BrowsingDataKinds.DiskCache |
+                CoreWebView2BrowsingDataKinds.BrowsingHistory |
+                CoreWebView2BrowsingDataKinds.CacheStorage |
+                CoreWebView2BrowsingDataKinds.Cookies |
+                CoreWebView2BrowsingDataKinds.DownloadHistory
+            );
 
             // 3 places to get web app:
             // 1. a url via WebAppUrl (e.g. locally hosted vite dev version of app)
@@ -238,7 +249,7 @@ namespace QuickLook.Plugin.WebViewPlus
 
         private void FrameNavigationStarting(object sender, CoreWebView2NavigationStartingEventArgs e)
         {
-            if (!e.Uri.StartsWith("blob:"))
+            if (!e.Uri.StartsWith("blob:") && !e.Uri.StartsWith("about:"))
             {
                 e.Cancel = true;
                 if (_webAppReady)
