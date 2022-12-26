@@ -208,7 +208,7 @@ namespace QuickLook.Plugin.WebViewPlus
             // 3. bundled with plugin
             var webAppInConfigFolder = Path.Combine(SettingHelper.LocalDataPath, "webviewplus");
             var webAppInBundledFolder = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "webviewplus");
-            var uri = new Uri("https://webviewplus/index.html");
+            var uri = new Uri("https://webviewplus.mooflu.com/index.html");
             var webAppUrl = SettingHelper.Get<string>("WebAppUrl", null, "QuickLook.Plugin.WebViewPlus");
             if (webAppUrl != null)
             {
@@ -221,12 +221,12 @@ namespace QuickLook.Plugin.WebViewPlus
                 if (File.Exists(Path.Combine(webAppInConfigFolder, "index.html")))
                 {
                     ProcessHelper.WriteLog("QuickLook.Plugin.WebViewPlus using app from config");
-                    _webView.CoreWebView2.SetVirtualHostNameToFolderMapping("webviewplus", webAppInConfigFolder, CoreWebView2HostResourceAccessKind.Allow);
+                    _webView.CoreWebView2.SetVirtualHostNameToFolderMapping("webviewplus.mooflu.com", webAppInConfigFolder, CoreWebView2HostResourceAccessKind.Allow);
                 }
                 else if(File.Exists(Path.Combine(webAppInBundledFolder, "index.html")))
                 {
                     ProcessHelper.WriteLog("QuickLook.Plugin.WebViewPlus using app from plugin");
-                    _webView.CoreWebView2.SetVirtualHostNameToFolderMapping("webviewplus", webAppInBundledFolder, CoreWebView2HostResourceAccessKind.Allow);
+                    _webView.CoreWebView2.SetVirtualHostNameToFolderMapping("webviewplus.mooflu.com", webAppInBundledFolder, CoreWebView2HostResourceAccessKind.Allow);
                 }
             }
             _webView.Source = uri;
