@@ -13,6 +13,8 @@ namespace QuickLook.Plugin.WebViewPlus
         private static WebpagePanel _panel;
 
         public int Priority => 1;
+        private static double _width = 1000;
+        private static double _height = 1200;
 
         public void Init()
         {
@@ -27,8 +29,8 @@ namespace QuickLook.Plugin.WebViewPlus
 
         public void Prepare(string path, ContextObject context)
         {
-            var desiredSize = new Size(1200, 1600);
-            context.SetPreferredSizeFit(desiredSize, 0.8);
+            var desiredSize = new Size(_width, _height);
+            context.SetPreferredSizeFit(desiredSize, 0.9);
         }
 
         public void View(string path, ContextObject context)
@@ -42,6 +44,9 @@ namespace QuickLook.Plugin.WebViewPlus
 
         public void Cleanup()
         {
+            _width = _panel.ActualWidth;
+            _height = _panel.ActualHeight;
+
             // starting webview2 is expensive, so keep it running and just unload the webapp data
             _panel.UnloadData();
 
