@@ -1,4 +1,4 @@
-![web-view-plus](https://user-images.githubusercontent.com/693717/210183065-5746cbb1-1541-40ff-8a64-66b2ebe1858c.svg)
+![image](https://user-images.githubusercontent.com/693717/210183526-1708c821-172e-4c71-9b02-2a9885654505.svg)
 
 # QuickLook.Plugin.WebViewPlus
 
