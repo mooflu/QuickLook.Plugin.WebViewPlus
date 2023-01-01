@@ -1,4 +1,4 @@
-![QuickLook icon](https://user-images.githubusercontent.com/1687847/29485863-8cd61b7c-84e2-11e7-97d5-eacc2ba10d28.png)
+![web-view-plus](https://user-images.githubusercontent.com/693717/210183065-5746cbb1-1541-40ff-8a64-66b2ebe1858c.svg)
 
 # QuickLook.Plugin.WebViewPlus
 
