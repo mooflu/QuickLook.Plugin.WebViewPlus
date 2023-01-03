@@ -195,11 +195,17 @@ namespace QuickLook.Plugin.WebViewPlus
             _webView.CoreWebView2.Settings.AreDefaultScriptDialogsEnabled = false;
             _webView.CoreWebView2.Settings.AreHostObjectsAllowed = false;
             _webView.CoreWebView2.Profile.ClearBrowsingDataAsync(
-                CoreWebView2BrowsingDataKinds.DiskCache |
-                CoreWebView2BrowsingDataKinds.BrowsingHistory |
+                CoreWebView2BrowsingDataKinds.FileSystems |
+                CoreWebView2BrowsingDataKinds.IndexedDb |
+                // keep local storage
+                CoreWebView2BrowsingDataKinds.WebSql |
                 CoreWebView2BrowsingDataKinds.CacheStorage |
                 CoreWebView2BrowsingDataKinds.Cookies |
-                CoreWebView2BrowsingDataKinds.DownloadHistory
+                CoreWebView2BrowsingDataKinds.DiskCache |
+                CoreWebView2BrowsingDataKinds.DownloadHistory |
+                CoreWebView2BrowsingDataKinds.GeneralAutofill |
+                CoreWebView2BrowsingDataKinds.PasswordAutosave |
+                CoreWebView2BrowsingDataKinds.Settings
             );
 
             // 3 places to get web app:
