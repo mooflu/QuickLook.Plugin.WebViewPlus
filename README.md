@@ -12,20 +12,18 @@
 4. Restart QuickLook.
 5. To configure which file types to preview via WebViewPlus, open an html file and click the gears button on the bottom right.
 
-## Experimental
-This plugin currently uses experimental MS Edge APIs and requires a dev or beta build of WebView2.
-Install MS Edge from one of the insider channels: https://www.microsoftedgeinsider.com/en-us/download
-and then set a system environment variable so indicate which should be used.
-E.g. WEBVIEW2_RELEASE_CHANNEL_PREFERENCE = 1
-https://learn.microsoft.com/en-us/microsoft-edge/webview2/how-to/set-preview-channel#using-an-environment-variable
-
-
 ## Development
 
  1. Clone this project. Do not forget to update submodules.
- 2. Build project with `Release` profile.
- 3. Run `Scripts\pack-zip.ps1`.
- 4. You should find a file named `QuickLook.Plugin.WebViewPlus.qlplugin` in the project directory.
+ 2. Copy WebViewPlus web app to `webApp` or set plugin config `WebAppUrl` - see `WebpagePanel.cs`
+ 3. Set `Output path` in `Debug` configuration to something like `..\QuickLook.upstream\Build\Debug\QuickLook.Plugin\QuickLook.Plugin.WebViewPlus\`
+ 4. Build plugin project with `Debug` profile
+ 5. Build and run upstream Quicklook with `Debug` profile
+
+ # Release
+ 1. Build project with `Release` profile.
+ 2. Run `Scripts\pack-zip.ps1`.
+ 3. You should find a file named `QuickLook.Plugin.WebViewPlus.qlplugin` in the project directory.
 
 ## License
 

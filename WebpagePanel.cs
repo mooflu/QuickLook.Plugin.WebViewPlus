@@ -136,18 +136,21 @@ namespace QuickLook.Plugin.WebViewPlus
             if (isBinary)
             {
                 _sharedBuffer = WebViewEnvironment.CreateSharedBuffer((ulong)_activeFileInfo.Length);
-                using (Stream stream = _sharedBuffer.OpenStream())
+                using (BinaryWriter writer = new BinaryWriter(_sharedBuffer.OpenStream()))
                 {
-                    using (BinaryWriter writer = new BinaryWriter(stream))
+                    using (var br = new BinaryReader(new FileStream(_activeFileInfo.FullName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite)))
                     {
-                        writer.Write(File.ReadAllBytes(_activeFileInfo.FullName));
+                        writer.Write(br.ReadBytes((int)br.BaseStream.Length));
                     }
                 }
             }
             else
             {
                 _sharedBuffer = WebViewEnvironment.CreateSharedBuffer(1);
-                textContent = File.ReadAllText(_activeFileInfo.FullName);
+                using (var sr = new StreamReader(new FileStream(_activeFileInfo.FullName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite)))
+                {
+                    textContent = sr.ReadToEnd();
+                }
             }
             var json = JsonConvert.SerializeObject(
                 new FileData
