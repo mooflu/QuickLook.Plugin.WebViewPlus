@@ -1,0 +1,129 @@
+name: WebViewPlugin Build
+
+on:
+  push:
+    tags:
+      - "[1-9].[0-9]+.[0-9]+"
+
+env:
+  # Path to the solution file relative to the root of the project.
+  SOLUTION_FILE_PATH: ./QuickLook.Plugin.WebViewPlus.sln
+
+  # Configuration type to build.
+  # You can convert this to a build matrix if you need coverage of multiple configuration types.
+  # https://docs.github.com/actions/learn-github-actions/managing-complex-workflows#using-a-build-matrix
+  BUILD_CONFIGURATION: Release
+
+  #GITHUB_REF_NAME - short ref name of the branch or tag
+
+permissions:
+  contents: read
+
+jobs:
+  build-webapp:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          repository: mooflu/WebViewPlus
+          ref: master
+
+      - name: Detect package manager
+        id: detect-package-manager
+        run: |
+          if [ -f "${{ github.workspace }}/yarn.lock" ]; then
+            echo "manager=yarn" >> $GITHUB_OUTPUT
+            echo "command=install" >> $GITHUB_OUTPUT
+            echo "runner=yarn" >> $GITHUB_OUTPUT
+            exit 0
+          elif [ -f "${{ github.workspace }}/package.json" ]; then
+            echo "manager=npm" >> $GITHUB_OUTPUT
+            echo "command=ci" >> $GITHUB_OUTPUT
+            echo "runner=npx --no-install" >> $GITHUB_OUTPUT
+            exit 0
+          else
+            echo "Unable to determine package manager"
+            exit 1
+          fi
+
+      - name: Setup Node
+        uses: actions/setup-node@v3
+        with:
+          node-version: "16"
+          cache: ${{ steps.detect-package-manager.outputs.manager }}
+
+      - name: Install dependencies
+        run: ${{ steps.detect-package-manager.outputs.manager }} ${{ steps.detect-package-manager.outputs.command }}
+
+      - name: Build with vitejs
+        run: ${{ steps.detect-package-manager.outputs.runner }} vite build
+
+      - name: Tar webapp files
+        run: tar -C ./build -cvf webapp.tar .
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: webapp
+          path: webapp.tar
+
+  build-plugin:
+    needs: build-webapp
+
+    runs-on: windows-latest
+
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        ref: master
+        submodules: recursive
+        fetch-depth: 0
+
+    - uses: actions/download-artifact@v3
+      with:
+        name: webapp
+        run: tar -C ./webApp -xvf webapp.tar
+
+    - name: Add MSBuild to PATH
+      uses: microsoft/setup-msbuild@v1.0.2
+
+    - name: Restore NuGet packages
+      working-directory: ${{env.GITHUB_WORKSPACE}}
+      run: nuget restore ${{env.SOLUTION_FILE_PATH}}
+
+    - name: Build
+      working-directory: ${{env.GITHUB_WORKSPACE}}
+      # Add additional options to the MSBuild command line here (like platform or verbosity level).
+      # See https://docs.microsoft.com/visualstudio/msbuild/msbuild-command-line-reference
+      run: msbuild /m /p:BuildInParallel=true /p:Configuration=${{env.BUILD_CONFIGURATION}} ${{env.SOLUTION_FILE_PATH}}
+
+    # upload msi and zip artifacts so the publish job below can download and then update latest release via Linux
+    - uses: actions/upload-artifact@v3
+      with:
+        name: quicklook-plugin
+        path: QuickLook.Plugin.WebViewPlus.qlplugin
+
+  publish:
+    needs: build-plugin
+
+    # one of the steps uses container action which is Linux only
+    runs-on: ubuntu-latest
+
+    permissions: write-all
+
+    steps:
+    - uses: actions/download-artifact@v3
+      with:
+        name: quicklook-plugin
+
+    - name: Publish release
+      # see https://github.com/pyTooling/Actions/tree/main/releaser
+      uses: pyTooling/Actions/releaser@main
+      with:
+        tag: ${{ env.GITHUB_REF_NAME }}
+        rm: true
+        token: ${{ secrets.GITHUB_TOKEN }}
+        files: QuickLook.Plugin.WebViewPlus.qlplugin
+
