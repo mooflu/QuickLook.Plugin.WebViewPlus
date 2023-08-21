@@ -84,7 +84,9 @@ jobs:
     - uses: actions/download-artifact@v3
       with:
         name: webapp
-        run: tar -C ./webApp -xvf webapp.tar
+
+    - name: Untar webapp files
+      run: tar -C ./webApp -xvf webapp.tar
 
     - name: Add MSBuild to PATH
       uses: microsoft/setup-msbuild@v1.0.2
