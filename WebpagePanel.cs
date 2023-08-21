@@ -38,7 +38,8 @@ namespace QuickLook.Plugin.WebViewPlus
             "html,htm,mht,mhtml,pdf,csv,xlsx,svg,md,markdown,gltf,glb,c++,h++,bat,c,cmake,cpp,cs,css,go,h,hpp,java,js,json,jsx,lua,perl,pl,ps1,psm1,py,rb,sass,scss,sh,sql,tex,ts,tsx,txt,webp,yaml,yml";
         public string[] Extensions = { };
 
-        private static readonly string[] _binExtensions = "pdf,xlsx,xls,ods,gltf,glb,fbx,obj,webp,jpg,jpeg,png,apng,gif,bmp".Split(',');
+        // These should match the ones in the web app openFile.ts:BINARY_EXTENSIONS
+        private static readonly string[] _binExtensions = "pdf,xlsx,xls,ods,gltf,glb,fbx,obj,webp,jpg,jpeg,png,apng,gif,bmp,ttf,otf,woff,woff2".Split(',');
         private Uri _currentUri;
         private WebView2 _webView;
         private bool _webAppReady = false;
