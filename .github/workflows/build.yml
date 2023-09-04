@@ -92,11 +92,11 @@ jobs:
       uses: microsoft/setup-msbuild@v1
 
     - name: Restore NuGet packages
-      working-directory: ${{env.GITHUB_WORKSPACE}}
+      working-directory: ${{github.workspace}}
       run: nuget restore ${{env.SOLUTION_FILE_PATH}}
 
     - name: Build
-      working-directory: ${{env.GITHUB_WORKSPACE}}
+      working-directory: ${{github.workspace}}
       # Add additional options to the MSBuild command line here (like platform or verbosity level).
       # See https://docs.microsoft.com/visualstudio/msbuild/msbuild-command-line-reference
       run: |
@@ -127,7 +127,7 @@ jobs:
       # see https://github.com/pyTooling/Actions/tree/main/releaser
       uses: pyTooling/Actions/releaser@main
       with:
-        tag: ${{ env.GITHUB_REF_NAME }}
+        tag: ${{ github.ref_name }}
         rm: true
         token: ${{ secrets.GITHUB_TOKEN }}
         files: QuickLook.Plugin.WebViewPlus.qlplugin
