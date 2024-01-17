@@ -35,7 +35,7 @@ namespace QuickLook.Plugin.WebViewPlus
     public class WebpagePanel : UserControl
     {
         public static readonly string DefaultExtensions =
-            "html,htm,mht,mhtml,pdf,csv,xlsx,svg,md,markdown,gltf,glb,c++,h++,bat,c,cmake,cpp,cs,css,go,h,hpp,java,js,json,jsx,lua,perl,pl,ps1,psm1,py,rb,sass,scss,sh,sql,tex,ts,tsx,txt,webp,yaml,yml";
+            "html,htm,mht,mhtml,pdf,csv,xlsx,svg,md,markdown,gltf,glb,c++,h++,bat,c,cmake,cpp,cs,css,d,go,h,hpp,java,js,json,jsx,kt,lua,m,mm,makefile,pas,perl,php,pl,ps1,psm1,py,r,rb,rs,sass,scala,scss,sh,sql,swift,tex,ts,tsx,txt,webp,xml,yaml,yml";
         public string[] Extensions = { };
 
         // These should match the ones in the web app openFile.ts:BINARY_EXTENSIONS
