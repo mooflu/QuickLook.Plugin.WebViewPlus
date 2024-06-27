@@ -6,12 +6,14 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Text;
 using System.Windows;
 using System.Windows.Controls;
 using Microsoft.Web.WebView2.Core;
 using Microsoft.Web.WebView2.Wpf;
 using Newtonsoft.Json;
 using QuickLook.Common.Helpers;
+using UtfUnknown;
 
 // Note: see webview2 sample app:
 // https://github.com/MicrosoftEdge/WebView2Samples/blob/main/SampleApps/WebView2WpfBrowser/MainWindow.xaml.cs
@@ -28,6 +30,15 @@ public class CommandMessage
 {
     public string command { get; set; }
     public string[] data { get; set; }
+    public bool boolValue;
+}
+
+public class InitData
+{
+    public string langCode { get; set; }
+    public bool detectEncoding { get; set; }
+    public bool showTrayIcon { get; set; }
+    public bool useTransparency { get; set; }
 }
 
 namespace QuickLook.Plugin.WebViewPlus
@@ -39,17 +50,19 @@ namespace QuickLook.Plugin.WebViewPlus
         public string[] Extensions = { };
 
         // These should match the ones in the web app openFile.ts:BINARY_EXTENSIONS
-        private static readonly string[] _binExtensions = "pdf,xlsx,xls,ods,gltf,glb,fbx,obj,webp,jpg,jpeg,png,apng,gif,bmp,ttf,otf,woff,woff2".Split(',');
+        private static readonly string[] _binExtensions = "pdf,xlsx,xls,ods,gltf,glb,fbx,obj,webp,jpg,jpeg,png,apng,gif,bmp,avif,ttf,otf,woff,woff2".Split(',');
         private Uri _currentUri;
         private WebView2 _webView;
         private bool _webAppReady = false;
         private CoreWebView2SharedBuffer _sharedBuffer = null;
         private FileInfo _activeFileInfo = null;
         private CoreWebView2Environment _webViewEnvironment;
+        private bool DetectEncoding = false;
 
         public WebpagePanel()
         {
             Extensions = SettingHelper.Get("ExtensionList", WebpagePanel.DefaultExtensions, "QuickLook.Plugin.WebViewPlus").Split(',');
+            DetectEncoding = SettingHelper.Get<bool>("DetectEncoding", false, "QuickLook.Plugin.WebViewPlus");
 
             var unavailReason = WebpagePanel.WebView2UnavailableReason();
             if (unavailReason != null)
@@ -148,7 +161,13 @@ namespace QuickLook.Plugin.WebViewPlus
             else
             {
                 _sharedBuffer = WebViewEnvironment.CreateSharedBuffer(1);
-                using (var sr = new StreamReader(new FileStream(_activeFileInfo.FullName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite)))
+
+                var encoding = Encoding.Default;
+                if (DetectEncoding)
+                {
+                    encoding = CharsetDetector.DetectFromFile(_activeFileInfo).Detected?.Encoding ?? encoding;
+                }
+                using (var sr = new StreamReader(new FileStream(_activeFileInfo.FullName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite), encoding))
                 {
                     textContent = sr.ReadToEnd();
                 }
@@ -177,7 +196,17 @@ namespace QuickLook.Plugin.WebViewPlus
                     // when a webview is created with a different language in 'new WebView2' above.
                     // You'd have to delete the WebView2_Data folder first.
                     // Oh, well. Explicitly sending current language to web app, instead.
-                    _webView.CoreWebView2.PostWebMessageAsString($"setLanguage:{CultureInfo.CurrentUICulture.Name}");
+                    var json = JsonConvert.SerializeObject(
+                        new InitData
+                        {
+                            langCode = CultureInfo.CurrentUICulture.Name,
+                            detectEncoding = SettingHelper.Get("DetectEncoding", false, "QuickLook.Plugin.WebViewPlus"),
+                            showTrayIcon = SettingHelper.Get("ShowTrayIcon", true),
+                            useTransparency = SettingHelper.Get("UseTransparency", true)
+                        }
+                    );
+
+                    _webView.CoreWebView2.PostWebMessageAsString($"initData:{json}");
                     sendFileData();
                     break;
 
@@ -186,9 +215,38 @@ namespace QuickLook.Plugin.WebViewPlus
                     Extensions = SettingHelper.Get("ExtensionList", WebpagePanel.DefaultExtensions, "QuickLook.Plugin.WebViewPlus").Split(',');
                     break;
 
+                case "DetectEncoding":
+                    SettingHelper.Set("DetectEncoding", msg.boolValue, "QuickLook.Plugin.WebViewPlus");
+                    DetectEncoding = SettingHelper.Get("DetectEncoding", false, "QuickLook.Plugin.WebViewPlus");
+                    break;
+
+                case "ShowTrayIcon":
+                    SettingHelper.Set("ShowTrayIcon", msg.boolValue);
+                    break;
+
+                case "UseTransparency":
+                    SettingHelper.Set("UseTransparency", msg.boolValue);
+                    break;
+
+                case "Restart":
+                    RestartQuicklook();
+                    break;
+
                 default:
                     break;
             }
+        }
+
+        private void RestartQuicklook()
+        {
+            // Restart QL. Clunky way to delay startup to pass already running check.
+            ProcessStartInfo Info = new ProcessStartInfo();
+            Info.Arguments = "/C ping 127.0.0.1 -n 2 && \"" + string.Join(" ", Environment.GetCommandLineArgs()) + "\"";
+            Info.WindowStyle = ProcessWindowStyle.Hidden;
+            Info.CreateNoWindow = true;
+            Info.FileName = "cmd.exe";
+            Process.Start(Info);
+            Process.GetCurrentProcess().Kill();
         }
 
         private void CoreWebView2InitializationCompleted(object sender, EventArgs e)
