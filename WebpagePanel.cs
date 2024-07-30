@@ -46,11 +46,11 @@ namespace QuickLook.Plugin.WebViewPlus
     public class WebpagePanel : UserControl
     {
         public static readonly string DefaultExtensions =
-            "html,htm,mht,mhtml,pdf,csv,xlsx,svg,md,markdown,gltf,glb,c++,h++,bat,c,cmake,cpp,cs,css,d,go,h,hpp,java,js,json,jsx,kt,lua,m,mm,makefile,pas,perl,php,pl,ps1,psm1,py,r,rb,rs,sass,scala,scss,sh,sql,swift,tex,ts,tsx,txt,webp,xml,yaml,yml";
+            "html,htm,mht,mhtml,pdf,epub,csv,xlsx,svg,md,markdown,gltf,glb,c++,h++,bat,c,cmake,cpp,cs,css,d,go,h,hpp,java,js,json,jsx,kt,lua,m,mm,makefile,pas,perl,php,pl,ps1,psm1,py,r,rb,rs,sass,scala,scss,sh,sql,swift,tex,ts,tsx,txt,webp,xml,yaml,yml";
         public string[] Extensions = { };
 
         // These should match the ones in the web app openFile.ts:BINARY_EXTENSIONS
-        private static readonly string[] _binExtensions = "pdf,xlsx,xls,ods,gltf,glb,fbx,obj,webp,jpg,jpeg,png,apng,gif,bmp,avif,ttf,otf,woff,woff2".Split(',');
+        private static readonly string[] _binExtensions = "pdf,epub,xlsx,xls,ods,gltf,glb,fbx,obj,webp,jpg,jpeg,png,apng,gif,bmp,avif,ttf,otf,woff,woff2".Split(',');
         private Uri _currentUri;
         private WebView2 _webView;
         private bool _webAppReady = false;
@@ -182,7 +182,9 @@ namespace QuickLook.Plugin.WebViewPlus
                 }
             );
 
-            _webView.CoreWebView2.PostSharedBufferToScript(_sharedBuffer, CoreWebView2SharedBufferAccess.ReadOnly, json);
+            // read-write access needed for epub/jszip. ArrayReader writes to itself.
+            // See https://github.com/Stuk/jszip/blob/v3.10.1/lib/reader/ArrayReader.js#L8
+            _webView.CoreWebView2.PostSharedBufferToScript(_sharedBuffer, CoreWebView2SharedBufferAccess.ReadWrite, json);
         }
 
         void WebMessageReceived(object sender, CoreWebView2WebMessageReceivedEventArgs args)
