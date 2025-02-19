@@ -47,7 +47,7 @@ namespace QuickLook.Plugin.WebViewPlus
     {
         public static readonly string DefaultExtensions =
             "html,htm,mht,mhtml,pdf,epub,csv,xlsx,svg,md,markdown,gltf,glb,c++,h++,bat,c,cmake,cpp,cs,css,d,go,h,hpp,java,js,json,jsx,kt,lua,m,mm,makefile,pas,perl,php,pl,ps1,psm1,py,r,rb,rs,sass,scala,scss,sh,sql,swift,tex,ts,tsx,txt,webp,xml,yaml,yml";
-        public string[] Extensions = { };
+        public static string[] Extensions = SettingHelper.Get("ExtensionList", WebpagePanel.DefaultExtensions, "QuickLook.Plugin.WebViewPlus").Split(',');
 
         // These should match the ones in the web app openFile.ts:BINARY_EXTENSIONS
         private static readonly string[] _binExtensions = "pdf,epub,xlsx,xls,ods,gltf,glb,fbx,obj,webp,jpg,jpeg,png,apng,gif,bmp,avif,ttf,otf,woff,woff2".Split(',');
@@ -61,7 +61,6 @@ namespace QuickLook.Plugin.WebViewPlus
 
         public WebpagePanel()
         {
-            Extensions = SettingHelper.Get("ExtensionList", WebpagePanel.DefaultExtensions, "QuickLook.Plugin.WebViewPlus").Split(',');
             DetectEncoding = SettingHelper.Get<bool>("DetectEncoding", false, "QuickLook.Plugin.WebViewPlus");
 
             var unavailReason = WebpagePanel.WebView2UnavailableReason();
@@ -329,7 +328,9 @@ namespace QuickLook.Plugin.WebViewPlus
             }
         }
 
-        public void UnloadData()
+        // No longer used - Changes in webview2 caused crashes due to
+        // "WebView2 controller will be auto closed if the parent hwnd is destroyed"
+        public void UnloadData() 
         {
             _activeFileInfo = null;
             _sharedBuffer?.Dispose();
@@ -340,7 +341,7 @@ namespace QuickLook.Plugin.WebViewPlus
             }
         }
 
-        public void Dispose() // Not used - unloading only; see above
+        public void Dispose()
         {
             _activeFileInfo = null;
             _sharedBuffer?.Dispose();

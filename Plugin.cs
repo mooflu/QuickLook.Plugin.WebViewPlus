@@ -10,7 +10,7 @@ namespace QuickLook.Plugin.WebViewPlus
 {
     public class Plugin : IViewer
     {
-        private static WebpagePanel _panel;
+        private WebpagePanel _panel;
 
         public int Priority => 1;
         private static double _width = 1000;
@@ -18,13 +18,12 @@ namespace QuickLook.Plugin.WebViewPlus
 
         public void Init()
         {
-            _panel = new WebpagePanel();
         }
 
         public bool CanHandle(string path)
         {
             var extension = Path.GetExtension(path).ToLower().Substring(1);
-            return !Directory.Exists(path) && _panel.Extensions.Any(extension.Equals);
+            return !Directory.Exists(path) && WebpagePanel.Extensions.Any(extension.Equals);
         }
 
         public void Prepare(string path, ContextObject context)
@@ -35,6 +34,7 @@ namespace QuickLook.Plugin.WebViewPlus
 
         public void View(string path, ContextObject context)
         {
+            _panel = new WebpagePanel();
             context.ViewerContent = _panel;
             context.Title = Path.IsPathRooted(path) ? Path.GetFileName(path) : path;
 
@@ -47,11 +47,8 @@ namespace QuickLook.Plugin.WebViewPlus
             _width = _panel.ActualWidth;
             _height = _panel.ActualHeight;
 
-            // starting webview2 is expensive, so keep it running and just unload the webapp data
-            _panel.UnloadData();
-
-            //_panel?.Dispose();
-            //_panel = null;
+            _panel?.Dispose();
+            _panel = null;
         }
     }
 }
