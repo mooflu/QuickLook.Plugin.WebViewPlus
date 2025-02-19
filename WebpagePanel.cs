@@ -58,6 +58,7 @@ namespace QuickLook.Plugin.WebViewPlus
         private FileInfo _activeFileInfo = null;
         private CoreWebView2Environment _webViewEnvironment;
         private bool DetectEncoding = false;
+        private static bool firstPreview = true;
 
         public WebpagePanel()
         {
@@ -257,19 +258,6 @@ namespace QuickLook.Plugin.WebViewPlus
             _webView.CoreWebView2.FrameNavigationStarting += FrameNavigationStarting;
             _webView.CoreWebView2.Settings.AreDefaultScriptDialogsEnabled = false;
             _webView.CoreWebView2.Settings.AreHostObjectsAllowed = false;
-            _webView.CoreWebView2.Profile.ClearBrowsingDataAsync(
-                CoreWebView2BrowsingDataKinds.FileSystems |
-                CoreWebView2BrowsingDataKinds.IndexedDb |
-                // keep local storage
-                CoreWebView2BrowsingDataKinds.WebSql |
-                CoreWebView2BrowsingDataKinds.CacheStorage |
-                CoreWebView2BrowsingDataKinds.Cookies |
-                CoreWebView2BrowsingDataKinds.DiskCache |
-                CoreWebView2BrowsingDataKinds.DownloadHistory |
-                CoreWebView2BrowsingDataKinds.GeneralAutofill |
-                CoreWebView2BrowsingDataKinds.PasswordAutosave |
-                CoreWebView2BrowsingDataKinds.Settings
-            );
 
             // 3 places to get web app:
             // 1. a url via WebAppUrl (e.g. locally hosted vite dev version of app)
@@ -281,7 +269,7 @@ namespace QuickLook.Plugin.WebViewPlus
             var webAppUrl = SettingHelper.Get<string>("WebAppUrl", null, "QuickLook.Plugin.WebViewPlus");
             if (webAppUrl != null)
             {
-                ProcessHelper.WriteLog($"QuickLook.Plugin.WebViewPlus using app via custom url: {webAppUrl}");
+                // ProcessHelper.WriteLog($"QuickLook.Plugin.WebViewPlus using app via custom url: {webAppUrl}");
                 uri = new Uri(webAppUrl);
             }
             else
@@ -289,12 +277,12 @@ namespace QuickLook.Plugin.WebViewPlus
                 // map webviewplus folder to a private virtual hostname
                 if (File.Exists(Path.Combine(webAppInConfigFolder, "index.html")))
                 {
-                    ProcessHelper.WriteLog("QuickLook.Plugin.WebViewPlus using app from config");
+                    // ProcessHelper.WriteLog("QuickLook.Plugin.WebViewPlus using app from config");
                     _webView.CoreWebView2.SetVirtualHostNameToFolderMapping("webviewplus.mooflu.com", webAppInConfigFolder, CoreWebView2HostResourceAccessKind.Allow);
                 }
                 else if(File.Exists(Path.Combine(webAppInBundledFolder, "index.html")))
                 {
-                    ProcessHelper.WriteLog("QuickLook.Plugin.WebViewPlus using app from plugin");
+                    // ProcessHelper.WriteLog("QuickLook.Plugin.WebViewPlus using app from plugin");
                     _webView.CoreWebView2.SetVirtualHostNameToFolderMapping("webviewplus.mooflu.com", webAppInBundledFolder, CoreWebView2HostResourceAccessKind.Allow);
                 }
             }
@@ -343,6 +331,24 @@ namespace QuickLook.Plugin.WebViewPlus
 
         public void Dispose()
         {
+            if (firstPreview)
+            {
+                firstPreview = false;
+                _webView.CoreWebView2.Profile.ClearBrowsingDataAsync(
+                    CoreWebView2BrowsingDataKinds.FileSystems |
+                    CoreWebView2BrowsingDataKinds.IndexedDb |
+                    // keep local storage
+                    CoreWebView2BrowsingDataKinds.WebSql |
+                    CoreWebView2BrowsingDataKinds.CacheStorage |
+                    CoreWebView2BrowsingDataKinds.Cookies |
+                    CoreWebView2BrowsingDataKinds.DiskCache |
+                    CoreWebView2BrowsingDataKinds.DownloadHistory |
+                    CoreWebView2BrowsingDataKinds.GeneralAutofill |
+                    CoreWebView2BrowsingDataKinds.PasswordAutosave |
+                    CoreWebView2BrowsingDataKinds.Settings
+                );
+            }
+
             _activeFileInfo = null;
             _sharedBuffer?.Dispose();
             _sharedBuffer = null;
