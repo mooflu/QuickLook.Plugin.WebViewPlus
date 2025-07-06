@@ -162,7 +162,7 @@ namespace QuickLook.Plugin.WebViewPlus
             {
                 _sharedBuffer = WebViewEnvironment.CreateSharedBuffer(1);
 
-                var encoding = Encoding.Default;
+                var encoding = Encoding.UTF8;
                 if (DetectEncoding)
                 {
                     encoding = CharsetDetector.DetectFromFile(_activeFileInfo).Detected?.Encoding ?? encoding;
