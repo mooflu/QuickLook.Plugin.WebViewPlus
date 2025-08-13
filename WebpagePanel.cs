@@ -2,6 +2,7 @@
 
 using System;
 using System.Diagnostics;
+using System.Drawing;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -81,7 +82,10 @@ namespace QuickLook.Plugin.WebViewPlus
                         // See "Process model for WebView2 apps"
                         UserDataFolder = Path.Combine(SettingHelper.LocalDataPath, @"WebViewPlus_Data\\"),
                         Language = CultureInfo.CurrentUICulture.Name
-                    }
+                    },
+                    // Match background color in theme.tsx in WebViewPlus
+                    // Note: this will not adjust if dark/light is swapped via the in-app yingyang toggle
+                    DefaultBackgroundColor = OSThemeHelper.AppsUseDarkTheme() ? Color.FromArgb(0x21, 0x21, 0x21) : Color.FromArgb(0xee, 0xee, 0xee),
                 };
                 _webView.NavigationStarting += NavigationStarting_CancelNavigation;
                 _webView.CoreWebView2InitializationCompleted += CoreWebView2InitializationCompleted;
