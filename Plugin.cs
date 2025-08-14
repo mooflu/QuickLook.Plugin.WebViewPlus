@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Windows;
 using System.Windows.Threading;
+using QuickLook.Common.Helpers;
 using QuickLook.Common.Plugin;
 
 namespace QuickLook.Plugin.WebViewPlus
@@ -13,8 +14,8 @@ namespace QuickLook.Plugin.WebViewPlus
         private WebpagePanel _panel;
 
         public int Priority => 1;
-        private static double _width = 1000;
-        private static double _height = 1200;
+        private static double _width = SettingHelper.Get("WindowWidth", 1000, "QuickLook.Plugin.WebViewPlus");
+        private static double _height = SettingHelper.Get("WindowHeight", 1200, "QuickLook.Plugin.WebViewPlus");
 
         public void Init()
         {
@@ -46,6 +47,9 @@ namespace QuickLook.Plugin.WebViewPlus
         {
             _width = _panel.ActualWidth;
             _height = _panel.ActualHeight;
+
+            SettingHelper.Set("WindowWidth", _width, "QuickLook.Plugin.WebViewPlus");
+            SettingHelper.Set("WindowHeight", _height, "QuickLook.Plugin.WebViewPlus");
 
             _panel?.Dispose();
             _panel = null;
