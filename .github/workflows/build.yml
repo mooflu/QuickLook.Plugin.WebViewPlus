@@ -124,11 +124,10 @@ jobs:
         name: quicklook-plugin
 
     - name: Publish release
-      # see https://github.com/pyTooling/Actions/tree/main/releaser
-      uses: pyTooling/Actions/releaser@main
+      uses: softprops/action-gh-release@v2
       with:
-        tag: ${{ github.ref_name }}
-        rm: true
-        token: ${{ secrets.GITHUB_TOKEN }}
         files: QuickLook.Plugin.WebViewPlus.qlplugin
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        
 
